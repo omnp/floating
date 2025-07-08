@@ -42,6 +42,15 @@ struct FloatingLayer
   double alpha;
 };
 
+typedef
+enum BlendMode
+{
+  BLEND_MODE_NORMAL = 0,
+  BLEND_MODE_ABSORB = 1,
+  BLEND_MODES,
+}
+BlendMode;
+
 struct Brush
 {
   double radius;
@@ -52,6 +61,7 @@ struct Brush
   int is_erasing;
   int is_picking;
   int is_smudging;
+  BlendMode mode;
   color color;
   color medium_color;
   Brush *next;
@@ -288,6 +298,7 @@ main (int argc, char **args)
   default_brush.is_picking = 0;
   default_brush.is_erasing = 0;
   default_brush.is_smudging = 0;
+  default_brush.mode = BLEND_MODE_NORMAL;
   default_brush.color = default_color;
   default_brush.medium_color = default_medium_color;
   default_brush.radius = BRUSH_SIZE_DEFAULT;
@@ -537,6 +548,7 @@ main (int argc, char **args)
   uint16_t win_pos_x = 0, win_pos_y = 0;
   float pressure = 0.0f;
   int colors_index = -1;
+  BlendMode blend_mode = BLEND_MODE_NORMAL;
   while ((event = xcb_wait_for_event (connection)))
     {
       switch (event->response_type & ~0x80)
@@ -825,11 +837,24 @@ main (int argc, char **args)
                                     unsigned int index = (j * width + i);
                                     color final_color = pix[index];
                                     color brush_color;
-                                    color_blend_absorb_single (
-                                        brush->medium_color.alpha,
-                                        &brush->color,
-                                        &brush->medium_color,
-                                        &brush_color);
+                                    switch (brush->mode)
+                                      {
+                                        case BLEND_MODE_ABSORB:
+                                        color_blend_absorb_single (
+                                            brush->medium_color.alpha,
+                                            &brush->color,
+                                            &brush->medium_color,
+                                            &brush_color);
+                                        break;
+                                        case BLEND_MODE_NORMAL:
+                                        default:
+                                        color_blend_single_struct (
+                                            brush->medium_color.alpha,
+                                            brush->color.vector,
+                                            brush->medium_color.vector,
+                                            &brush_color);
+                                        break;
+                                      }
                                     if (distance_sq / brush_radius_sq
                                         >= brush_hardness)
                                       {
@@ -858,11 +883,24 @@ main (int argc, char **args)
                                           {
                                             blend_factor
                                                 = alpha * brush_color.alpha;
-                                            color_blend_absorb_single (
-                                                blend_factor,
-                                                &final_color,
-                                                &brush_color,
-                                                &final_color);
+                                            switch (brush->mode)
+                                              {
+                                                case BLEND_MODE_ABSORB:
+                                                color_blend_absorb_single (
+                                                    blend_factor,
+                                                    &final_color,
+                                                    &brush_color,
+                                                    &final_color);
+                                                break;
+                                                case BLEND_MODE_NORMAL:
+                                                default:
+                                                color_blend_single_struct (
+                                                    blend_factor,
+                                                    final_color.vector,
+                                                    brush_color.vector,
+                                                    &final_color);
+                                                break;
+                                              }
                                           }
                                         else
                                           {
@@ -896,9 +934,20 @@ main (int argc, char **args)
                             total_color.alpha /= total_pixels;
                             if (brush->is_smudging)
                               {
-                                color_blend_absorb_single (
-                                    brush_smudge, &brush->color,
-                                    &total_color, &brush->color);
+                                switch (brush->mode)
+                                  {
+                                    case BLEND_MODE_ABSORB:
+                                    color_blend_absorb_single (
+                                        brush_smudge, &brush->color,
+                                        &total_color, &brush->color);
+                                    break;
+                                    case BLEND_MODE_NORMAL:
+                                    default:
+                                    color_blend_absorb_single (
+                                        brush_smudge, &brush->color,
+                                        &total_color, &brush->color);
+                                    break;
+                                  }
                               }
                             if (brush->is_picking)
                               {
@@ -1205,6 +1254,35 @@ main (int argc, char **args)
                       while (brush != NULL)
                         {
                           brush->color = *Colors[colors_index];
+                          brush = brush->next;
+                        }
+                    }
+                  break;
+                }
+              case 58:
+                { /*key: m; next blend mode*/
+                  if (blend_mode >= 0)
+                    {
+                      if (key_event->state & XCB_MOD_MASK_SHIFT)
+                        { /*shift-m previous blend mode*/
+                          blend_mode -= 1;
+                          if (blend_mode < 0)
+                            {
+                              blend_mode = BLEND_MODES - 1;
+                            }
+                        }
+                      else
+                        {
+                          blend_mode += 1;
+                          if (blend_mode >= colors)
+                            {
+                              blend_mode = 0;
+                            }
+                        }
+                      Brush *brush = drawing->active_brushes;
+                      while (brush != NULL)
+                        {
+                          brush->mode = blend_mode;
                           brush = brush->next;
                         }
                     }
