@@ -5,6 +5,9 @@ typedef struct image_t image_t;
 typedef union color color;
 typedef __m128 colorvector;
 
+void color_blend_absorb (const float *t, const color *x, const color  *y, color *z);
+void color_blend_absorb_single (const float t, const color *x, const color *y, color *z);
+
 image_t *
 image_new (unsigned int width, unsigned int height);
 

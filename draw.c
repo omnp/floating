@@ -185,9 +185,9 @@ update (FloatingDrawing *drawing, rect invalid_area, int image_width,
                               color_multiply_single_struct (
                                   current->alpha, current_color.vector,
                                   &current_color);
-                              color_blend_single_struct (
-                                  current_alpha, final_color.vector,
-                                  current_color.vector, &final_color);
+                              color_blend_absorb_single (
+                                  current_alpha, &final_color,
+                                  &current_color, &final_color);
                               color_multiply_single_struct (
                                   inv_alpha, final_color.vector, &final_color);
                               final_color.alpha = fmin (
@@ -825,10 +825,10 @@ main (int argc, char **args)
                                     unsigned int index = (j * width + i);
                                     color final_color = pix[index];
                                     color brush_color;
-                                    color_blend_single_struct (
+                                    color_blend_absorb_single (
                                         brush->medium_color.alpha,
-                                        brush->color.vector,
-                                        brush->medium_color.vector,
+                                        &brush->color,
+                                        &brush->medium_color,
                                         &brush_color);
                                     if (distance_sq / brush_radius_sq
                                         >= brush_hardness)
@@ -858,10 +858,10 @@ main (int argc, char **args)
                                           {
                                             blend_factor
                                                 = alpha * brush_color.alpha;
-                                            color_blend_single_struct (
+                                            color_blend_absorb_single (
                                                 blend_factor,
-                                                final_color.vector,
-                                                brush_color.vector,
+                                                &final_color,
+                                                &brush_color,
                                                 &final_color);
                                           }
                                         else
@@ -896,9 +896,9 @@ main (int argc, char **args)
                             total_color.alpha /= total_pixels;
                             if (brush->is_smudging)
                               {
-                                color_blend_single_struct (
-                                    brush_smudge, brush->color.vector,
-                                    total_color.vector, &brush->color);
+                                color_blend_absorb_single (
+                                    brush_smudge, &brush->color,
+                                    &total_color, &brush->color);
                               }
                             if (brush->is_picking)
                               {

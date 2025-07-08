@@ -1,6 +1,64 @@
 #include "image.h"
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
+
+
+void color_blend_absorb (const float *t, const color *x, const color *y, color *z)
+{
+    const int components = 4;
+    int c;
+    float x_max   = 0.0f;
+    float y_max   = 0.0f;
+    float z_max = 0.0f;
+    for (c = 0; c < components; c++)
+      {
+        x_max = fmaxf(x_max, x->values[c]);
+        y_max = fmaxf(y_max, y->values[c]);
+      }
+    for (c = 0; c < components; c++)
+      {
+        float value = x_max - x->values[c];
+        z->values[c] = value + (y_max - y->values[c] - value) * t[c];
+      }
+    for (c = 0; c < components; c++)
+      {
+        z_max = fmaxf(z_max, z->values[c]);
+      }
+    for (c = 0; c < components; c++)
+      {
+        z->values[c] = z_max - z->values[c];
+      }
+}
+
+
+void color_blend_absorb_single (const float t, const color *x, const color *y, color *z)
+{
+    const int components = 4;
+    int c;
+    float x_max   = 0.0f;
+    float y_max   = 0.0f;
+    float z_max = 0.0f;
+    for (c = 0; c < components; c++)
+      {
+        x_max = fmaxf(x_max, x->values[c]);
+        y_max = fmaxf(y_max, y->values[c]);
+      }
+    for (c = 0; c < components; c++)
+      {
+        float value = x_max - x->values[c];
+        z->values[c] = value + (y_max - y->values[c] - value) * t;
+      }
+    for (c = 0; c < components; c++)
+      {
+        z_max = fmaxf(z_max, z->values[c]);
+      }
+    for (c = 0; c < components; c++)
+      {
+        z->values[c] = z_max - z->values[c];
+      }
+}
+
 
 image_t *
 image_new (unsigned int width, unsigned int height)
