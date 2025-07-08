@@ -1,5 +1,5 @@
 # floating
-Basic digital paint program using C, xcb and libtiff (to save the images) supporting a Wacom tablet and stylus in addition to a mouse.
+Basic digital paint program using C, xcb and libtiff (to save the images) supporting a graphics tablet and stylus in addition to a mouse.
 
 The goal of this project thus far has been to implement a simple paint program in C using xcb (and in the process *learn* the basics of xcb).
 It is *very* basic in the current state, for example there is no zooming of the "canvas" or anything like that (as this is "pure" xcb with no additional gui component library).
@@ -14,7 +14,9 @@ Feel free to fork if you find anything interesting in here.
 
 # Running the program
 The binary is (logically) called draw.
-Make sure that your (Wacom) graphics tablet is plugged in before you execute the program if you want to use it in the current painting session.
+Make sure that your graphics tablet is plugged in before you execute the program if you want to use it in the current painting session.
+The stylus device part should be identified as containing 'stylus' or 'Stylus' in device name information otherwise it will not be used.
+This is because many devices report many axes even if they are not a graphics tablet stylus.
 The keybindings may be described in a later update to this document, currently your best bet is to read the source (the event loop at the end part of draw.c).
 But to get you off the ground:
   * Hit 'b' to start brushing, and again to stop.

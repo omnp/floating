@@ -317,8 +317,6 @@ main (int argc, char **args)
   drawing_obj.medium_color = default_medium_color;
   FloatingDrawing *drawing = &drawing_obj;
 
-  const char vendor_name[] = "Wacom", stylus[] = "Pen stylus",
-             finger[] = "Finger";
   uint8_t graphics_tablet_stylus_device_id
       = 0; /* Will find what the correct id is later. */
   const int graphics_tablet_stylus_pressure_axis_number = 3;
@@ -401,11 +399,11 @@ main (int argc, char **args)
       char *name = xcb_input_xi_device_info_name (info);
       printf ("%d %d %s %d %d\n", info->deviceid, info->type, name,
               info->attachment, info->num_classes);
-      if (strstr (name, vendor_name) && strstr (name, stylus))
+      if (strstr(name, "stylus") || strstr(name, "Stylus"))
         {
           graphics_tablet_stylus_device_id = info->deviceid;
-          printf ("Found %s graphics tablet stylus with device id = %d\n",
-                  vendor_name, graphics_tablet_stylus_device_id);
+          printf ("Found %s device with device id = %d\n",
+                  name, info->deviceid);
           xcb_input_device_class_iterator_t class_iterator
               = xcb_input_xi_device_info_classes_iterator (info);
           for (; class_iterator.rem;
@@ -685,18 +683,14 @@ main (int argc, char **args)
                                   == graphics_tablet_stylus_x_axis_number - 1)
                                 {
                                   long pos_x
-                                      = root_width * dbl_value
-                                        / (graphics_tablet_stylus_x_axis_max
-                                           - graphics_tablet_stylus_x_axis_min);
+                                      = dbl_value;
                                   drawing->x = pos_x - win_pos_x;
                                 }
                               if (i
                                   == graphics_tablet_stylus_y_axis_number - 1)
                                 {
                                   long pos_y
-                                      = root_height * dbl_value
-                                        / (graphics_tablet_stylus_y_axis_max
-                                           - graphics_tablet_stylus_y_axis_min);
+                                      = dbl_value;
                                   drawing->y = pos_y - win_pos_y;
                                 }
                               if (i
