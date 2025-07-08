@@ -10,6 +10,13 @@ A makefile is provided in order to build the program.
 Dependencies are gcc (clang may work as well), libxcb, and libtiff, and of course make.
 For example on a Fedora system, do a "dnf install gcc libxcb-devel libtiff-devel make".
 
+There are now version targets in the makefile:
+
+    make draw
+    make draw-wayland
+
+Which build the regular and the Wayland adjusted version respectively.
+
 Feel free to fork if you find anything interesting in here.
 
 # Running the program

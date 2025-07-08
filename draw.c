@@ -682,16 +682,32 @@ main (int argc, char **args)
                               if (i
                                   == graphics_tablet_stylus_x_axis_number - 1)
                                 {
+#ifndef WAYLAND
+                                  long pos_x
+                                      = root_width * dbl_value
+                                        / (graphics_tablet_stylus_x_axis_max
+                                           - graphics_tablet_stylus_x_axis_min);
+                                  drawing->x = pos_x - win_pos_x;
+#else
                                   long pos_x
                                       = dbl_value;
                                   drawing->x = pos_x - win_pos_x;
+#endif
                                 }
                               if (i
                                   == graphics_tablet_stylus_y_axis_number - 1)
                                 {
+#ifndef WAYLAND
+                                  long pos_y
+                                      = root_height * dbl_value
+                                        / (graphics_tablet_stylus_y_axis_max
+                                           - graphics_tablet_stylus_y_axis_min);
+                                  drawing->y = pos_y - win_pos_y;
+#else
                                   long pos_y
                                       = dbl_value;
                                   drawing->y = pos_y - win_pos_y;
+#endif
                                 }
                               if (i
                                   == graphics_tablet_stylus_pressure_axis_number
