@@ -275,12 +275,19 @@ const color Green = { { 0.0, 1.0, 0.0, 1.0 } };
 const color Blue = { { 0.0, 0.0, 1.0, 1.0 } };
 const color White = { { 1.0, 1.0, 1.0, 1.0 } };
 const color Black = { { 0.0, 0.0, 0.0, 1.0 } };
+const color Gray = { { 0.5, 0.5, 0.5, 1.0 } };
+const color Cyan = { { 0.0, 1.0, 1.0, 1.0 } };
+const color Magenta = { { 1.0, 0.0, 1.0, 1.0 } };
+const color Yellow = { { 1.0, 1.0, 0.0, 1.0 } };
 
 int
 main (int argc, char **args)
 {
-  const color *Colors[] = { &Red, &Green, &Blue, &White, &Black };
-  const int colors = 5; /*length of Colors*/
+  const color *Colors[] =
+    {
+      &Red, &Green, &Blue, &White, &Black, &Gray, &Cyan, &Magenta, &Yellow
+    };
+  const int colors = 9; /*length of Colors*/
   int image_width = 400;
   int image_height = 400;
   char *image_file_name = 0;
@@ -1230,6 +1237,24 @@ main (int argc, char **args)
               case 14:
                 { /*key: 5; color number 5*/
                   colors_index = 4;
+                  drawing->color = *Colors[colors_index];
+                  Brush *brush = drawing->active_brushes;
+                  while (brush != NULL)
+                    {
+                      brush->color = *Colors[colors_index];
+                      brush = brush->next;
+                    }
+                  break;
+                }
+              case 15:
+              case 16:
+              case 17:
+              case 18:
+                { /*key: 6; color number 6*/
+                  /*key: 7; color number 7*/
+                  /*key: 8; color number 8*/
+                  /*key: 9; color number 9*/
+                  colors_index = key_event->detail - 10;
                   drawing->color = *Colors[colors_index];
                   Brush *brush = drawing->active_brushes;
                   while (brush != NULL)
