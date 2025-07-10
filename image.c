@@ -8,26 +8,24 @@ void color_blend_absorb (const float *t, const color *x, const color *y, color *
 {
     const int components = 4;
     int c;
-    float x_max   = 0.0f;
-    float y_max   = 0.0f;
-    float z_max = 0.0f;
+    /* It is assumed that the input is 0.0f to 1.0f.
+       So that the maximum sum is then 2.0f.
+     */
+    float const x_max = 2.0f;
+    float const y_max = 2.0f;
+    float const z_max = 2.0f;
+    float x_gray = fminf(fminf(x->values[0], x->values[1]), x->values[2]);
+    float y_gray = fminf(fminf(x->values[0], x->values[1]), x->values[2]);
+#pragma omp simd
     for (c = 0; c < components; c++)
       {
-        x_max = fmaxf(x_max, x->values[c]);
-        y_max = fmaxf(y_max, y->values[c]);
+        float value = x_max - x->values[c] + x_gray;
+        z->values[c] = value + (y_max - y->values[c] + y_gray - value) * t[c];
       }
+#pragma omp simd
     for (c = 0; c < components; c++)
       {
-        float value = x_max - x->values[c];
-        z->values[c] = value + (y_max - y->values[c] - value) * t[c];
-      }
-    for (c = 0; c < components; c++)
-      {
-        z_max = fmaxf(z_max, z->values[c]);
-      }
-    for (c = 0; c < components; c++)
-      {
-        z->values[c] = z_max - z->values[c];
+        z->values[c] = z_max - z->values[c] + (y_gray - x_gray) * t[c] + x_gray;
       }
 }
 
@@ -36,26 +34,24 @@ void color_blend_absorb_single (const float t, const color *x, const color *y, c
 {
     const int components = 4;
     int c;
-    float x_max   = 0.0f;
-    float y_max   = 0.0f;
-    float z_max = 0.0f;
+    /* It is assumed that the input is 0.0f to 1.0f.
+       So that the maximum sum is then 2.0f.
+     */
+    float const x_max = 2.0f;
+    float const y_max = 2.0f;
+    float const z_max = 2.0f;
+    float x_gray = fminf(fminf(x->values[0], x->values[1]), x->values[2]);
+    float y_gray = fminf(fminf(x->values[0], x->values[1]), x->values[2]);
+#pragma omp simd
     for (c = 0; c < components; c++)
       {
-        x_max = fmaxf(x_max, x->values[c]);
-        y_max = fmaxf(y_max, y->values[c]);
+        float value = x_max - x->values[c] + x_gray;
+        z->values[c] = value + (y_max - y->values[c] + y_gray - value) * t;
       }
+#pragma omp simd
     for (c = 0; c < components; c++)
       {
-        float value = x_max - x->values[c];
-        z->values[c] = value + (y_max - y->values[c] - value) * t;
-      }
-    for (c = 0; c < components; c++)
-      {
-        z_max = fmaxf(z_max, z->values[c]);
-      }
-    for (c = 0; c < components; c++)
-      {
-        z->values[c] = z_max - z->values[c];
+        z->values[c] = z_max - z->values[c] + (y_gray - x_gray) * t + x_gray;
       }
 }
 
